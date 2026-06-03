@@ -1,122 +1,140 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useState, useRef } from 'react'
+import { Search, Music2, Radio, Disc3, Mic2, BarChart2 } from 'lucide-react'
+import { cn } from '@/lib/utils'
+import { RecentTracks } from '@/components/lastfm/RecentTracks'
+import { TopTracks } from '@/components/lastfm/TopTracks'
+import { TopAlbums } from '@/components/lastfm/TopAlbums'
+import { TopArtists } from '@/components/lastfm/TopArtists'
 
-function App() {
-  const [count, setCount] = useState(0)
+type Tab = 'recent' | 'top-tracks' | 'top-albums' | 'top-artists'
+
+const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
+  { id: 'recent', label: 'Recent', icon: <Radio className="h-3.5 w-3.5" /> },
+  { id: 'top-tracks', label: 'Top Tracks', icon: <Music2 className="h-3.5 w-3.5" /> },
+  { id: 'top-albums', label: 'Top Albums', icon: <Disc3 className="h-3.5 w-3.5" /> },
+  { id: 'top-artists', label: 'Top Artists', icon: <Mic2 className="h-3.5 w-3.5" /> },
+]
+
+export default function App() {
+  const [inputValue, setInputValue] = useState('')
+  const [activeUsername, setActiveUsername] = useState<string | null>(null)
+  const [activeTab, setActiveTab] = useState<Tab>('recent')
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  function handleSearch() {
+    const trimmed = inputValue.trim()
+    if (!trimmed) return
+    setActiveUsername(trimmed)
+    setActiveTab('recent')
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent) {
+    if (e.key === 'Enter') handleSearch()
+  }
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <div className="min-h-screen flex flex-col">
+      {/* Header */}
+      <header className="border-b border-border/50 backdrop-blur-sm sticky top-0 z-10 bg-background/80">
+        <div className="mx-auto max-w-2xl px-4 py-4 flex items-center gap-3">
+          <div className="flex items-center gap-2 mr-2">
+            <BarChart2 className="h-5 w-5 text-primary" />
+            <span className="font-display font-bold text-sm tracking-tight">scrobbles</span>
+          </div>
 
-      <div className="ticks"></div>
+          {/* Search */}
+          <div className="flex-1 relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
+            <input
+              ref={inputRef}
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Enter a Last.fm username…"
+              className={cn(
+                'w-full rounded-lg bg-secondary pl-9 pr-4 py-2 text-sm',
+                'text-foreground placeholder:text-muted-foreground',
+                'border border-transparent focus:border-primary/40 focus:outline-none',
+                'transition-colors font-body'
+              )}
+            />
+          </div>
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
+          <button
+            onClick={handleSearch}
+            disabled={!inputValue.trim()}
+            className={cn(
+              'rounded-lg px-4 py-2 text-sm font-medium font-display transition-all',
+              'bg-primary text-primary-foreground',
+              'hover:bg-primary/90 active:scale-[0.98]',
+              'disabled:opacity-40 disabled:cursor-not-allowed'
+            )}
+          >
+            Go
+          </button>
         </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+      </header>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+      {/* Main */}
+      <main className="flex-1 mx-auto w-full max-w-2xl px-4 py-6">
+        {!activeUsername ? (
+          <div className="flex flex-col items-center justify-center py-32 gap-4 animate-fade-up">
+            <div className="rounded-full bg-primary/10 p-5">
+              <Music2 className="h-8 w-8 text-primary" />
+            </div>
+            <div className="text-center">
+              <p className="font-display font-semibold text-lg">Search a username</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                Enter a Last.fm username to see their listening history
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div className="animate-fade-up">
+            {/* User label */}
+            <div className="mb-5 flex items-center gap-2">
+              <div className="h-2 w-2 rounded-full bg-primary" />
+              <span className="font-display font-semibold text-lg">{activeUsername}</span>
+              <a
+                href={`https://www.last.fm/user/${activeUsername}`}
+                target="_blank"
+                rel="noreferrer"
+                className="text-xs text-muted-foreground hover:text-foreground transition-colors ml-1"
+              >
+                ↗ last.fm
+              </a>
+            </div>
+
+            {/* Tabs */}
+            <div className="mb-5 flex gap-1 bg-secondary/60 rounded-lg p-1">
+              {TABS.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={cn(
+                    'flex-1 flex items-center justify-center gap-1.5 rounded px-3 py-2',
+                    'text-xs font-medium font-body transition-all duration-150',
+                    activeTab === tab.id
+                      ? 'bg-background text-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground'
+                  )}
+                >
+                  {tab.icon}
+                  <span className="hidden sm:inline">{tab.label}</span>
+                </button>
+              ))}
+            </div>
+
+            {/* Panel */}
+            <div className="rounded-xl border border-border/60 bg-card overflow-hidden">
+              {activeTab === 'recent' && <RecentTracks username={activeUsername} />}
+              {activeTab === 'top-tracks' && <TopTracks username={activeUsername} />}
+              {activeTab === 'top-albums' && <TopAlbums username={activeUsername} />}
+              {activeTab === 'top-artists' && <TopArtists username={activeUsername} />}
+            </div>
+          </div>
+        )}
+      </main>
+    </div>
   )
 }
-
-export default App
